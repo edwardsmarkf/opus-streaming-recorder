@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Opus-streaming-recorder by edwardsmarkf</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Opus-streaming-recorder</h1>
+      <h2 class="project-tagline">Recording and streaming audio directly to the server from browser</h2>
+      <a href="https://github.com/edwardsmarkf/opus-streaming-recorder" class="btn">View on GitHub</a>
+      <a href="https://github.com/edwardsmarkf/opus-streaming-recorder/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/edwardsmarkf/opus-streaming-recorder/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h1>
+
+<p><a href="https://github.com/chris-rudmin/Recorderjs">https://github.com/chris-rudmin/Recorderjs</a></p>
+
+<p><a href="https://github.com/binaryjs/binaryjs">https://github.com/binaryjs/binaryjs</a></p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+
+<ol>
+<li>Unpack files somewhere on your server</li>
+<li>Enter directory with the files ex. <code>cd stream-recorder</code>
+</li>
+<li>Run <code>npm install</code> command</li>
+<li>Now you should able to run the server by <code>node server.js</code>
+</li>
+</ol>
+
+<p><strong>NOTICE:</strong>
+Server run default on port 22810 to change it need to edit <code>server.js</code> file. To change port which it runs edit <code>server.listen(22810);</code> to <code>server.listen(YOUR_PORT);</code> where YOUR_PORT is port number;</p>
+
+<p>Also need to edit <code>client/index.html</code> file:</p>
+
+<p><strong>In <code>&lt;script&gt;</code> tag in <code>&lt;head&gt;</code> section</strong></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> <span class="pl-c1">HOST</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>127.0.0.1<span class="pl-pds">'</span></span>, <span class="pl-k">&lt;</span><span class="pl-k">-</span> here change <span class="pl-s"><span class="pl-pds">`</span>127.0.0.1<span class="pl-pds">`</span></span> to your server external <span class="pl-c1">IP</span>
+<span class="pl-k">var</span> <span class="pl-c1">PORT</span> <span class="pl-k">=</span>  <span class="pl-c1">22810</span>, <span class="pl-k">&lt;</span><span class="pl-k">-</span> here change port number to one you choose</pre></div>
+
+<p><strong>Later at the end of  tag</strong></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> options <span class="pl-k">=</span> {
+    recorder<span class="pl-k">:</span> {
+        monitorGain<span class="pl-k">:</span> <span class="pl-c1">0</span>,
+        bitDepth<span class="pl-k">:</span> <span class="pl-c1">16</span>, <span class="pl-c">// 8, 16, 24, 32</span>
+        numberOfChannels<span class="pl-k">:</span> <span class="pl-c1">1</span>,
+        sampleRate<span class="pl-k">:</span> <span class="pl-c1">48000</span>,
+        recordOpus<span class="pl-k">:</span> <span class="pl-c1">true</span>
+    }
+};</pre></div>
+
+<h1>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h1>
+
+<p>Once you run server open <code>127.0.0.1:22810</code> in your browser (browser will ask you to give permission to use your microphone). You should see <em>Recorder</em> section and <em>Log</em> section. In the <em>Log</em> section you should see <code>Connected to the stream server localhost on port 22810</code> message.</p>
+
+<p>On the <em>Recorder</em> section you will see waveform container and some buttons:</p>
+
+<ul>
+<li>
+<em>Init</em> - initializes the recorder, it will starts to listen to audio from microphone, but not yet send it to the server.</li>
+<li>
+<em>Record (red dot)</em> - Once you push it, it starts recording audio and streaming it to the server. When you push it during recording it pauses it, then push it again to resume.</li>
+<li>
+<em>Stop (square)</em> - It stops the recording.</li>
+<li>
+<em>Fill color</em> and <em>Background color</em> - You can set the colors of waveform there <strong>NOTICE: you have to do that before initialize.</strong>
+</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/edwardsmarkf/opus-streaming-recorder">Opus-streaming-recorder</a> is maintained by <a href="https://github.com/edwardsmarkf">edwardsmarkf</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
