@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Live input record and playback</title>
+  <script src="scripts/vendor/recorder.js"></script>
+  <script src="scripts/waveform.js"></script>
+  <script src="scripts/binary.min.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="styles/icons.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <script>
+      var PORT = 22810;
+      var HOST = 'localhost';
+  </script>
+</head>
+<body>
+    <h2>Recorder</h2>
+    <div class="recorder">
+        <canvas id="waveform"></canvas>
+        <div class="recorder-buttons">
+            <button id="init" disabled>Init</button>
+            <button id="start" disabled><i class="icon-record"></i></button>
+            <button id="stopButton" disabled><i class="icon-stop"></i></button>
+            <label for="backgroundColor">Background color: </label><input type="color" id="backgroundColor" value="#ffffff">
+            <label for="fillColor">Fill color: </label><input type="color" id="fillColor" value="#000000">
+        </div>
+    </div>
+
+    <h2>Recordings</h2>
+    <ul id="recordingslist"></ul>
+
+    <h2>Log</h2>
+    <pre id="log"></pre>
+
+    <script>
+    var options = {
+        host: HOST,
+        port: PORT,
+        recorder: {
+            monitorGain: 0,
+            bitDepth: 16, // 8, 16, 24, 32
+            numberOfChannels: 1,
+            sampleRate: 44100,
+            recordOpus: true
+        }
+    };
+    var recorder;
+    var client = new BinaryClient('ws://' + HOST + ':' + PORT);
+    var audioStream;
+    
+    var data;
+
+    /* Handle connection `open` event */
+    client.on('open', function() {
+        screenLogger('Connected to the stream server <b>' + HOST + '</b> on port <b>' + PORT + '</b>');
+        init.disabled = false;
+    });
+
+    client.on('close', function() {
+        screenLogger('Connection closed');
+        start.disabled = init.disabled = stopButton.disabled = true;
+    });
+
+    /*
+     * Bind events for recorder controls buttons
+     */
+    start.addEventListener("click", function(e) { 
+        e.preventDefault();
+        if (recorder.state === 'recording') {
+            recorder.pause();
+        } else if (recorder.state === 'paused') {
+            recorder.resume();
+        } else {
+            recorder.start();
+        }
+    });
+
+    stopButton.addEventListener("click", function(e) { 
+        e.preventDefault();
+        recorder.stop();
+    });
+
+    init.addEventListener("click", function(e) {
+        e.preventDefault();
+        var fileName = '';
+        init.disabled = stopButton.disabled = true;
+        start.disabled = false;
+
+        recorder = new Recorder({
+            monitorGain: options.monitorGain,
+            numberOfChannels: options.numberOfChannels,
+            bitDepth: options.bitDepth,
+            recordOpus: {
+                stream: true
+            },
+            sampleRate: options.sampleRate,
+            waveform: true,
+            waveformOptions: {
+                canvas: document.getElementById('waveform'),
+                backgroundColor: backgroundColor.value,
+                fillColor: fillColor.value
+            }
+        });
+
+        recorder.addEventListener( "start", function(e){
+            fileName = new Date().getTime() + '.ogg';
+            audioStream = client.createStream({ file: fileName });
+            screenLogger('Recorder is started');
+            init.disabled = true;
+            stopButton.disabled = false;
+            start.firstElementChild.className = 'icon-record active';
+
+            console.log(audioStream)
+        });
+
+        recorder.addEventListener( "stop", function(e){
+            screenLogger('Recorder is stopped');
+            start.disabled = false;
+            init.disabled = true;
+            stopButton.disabled = true;
+            start.firstElementChild.className = 'icon-record';
+        });
+
+        recorder.addEventListener( "pause", function(e){
+            screenLogger('Recorder is paused');
+            init.disabled = true;
+            stopButton.disabled = false;
+            start.firstElementChild.className = 'icon-record';
+        });
+
+        recorder.addEventListener( "resume", function(e){
+            screenLogger('Recorder is resuming');
+            init.disabled = true;
+            stopButton.disabled = false;
+            start.firstElementChild.className = 'icon-record active';
+        });
+
+        recorder.addEventListener( "recordingProgress", function(e) {
+            // screenLogger('Recorded ' + e.detail + ' seconds');
+        });
+
+        recorder.addEventListener( "recordingError", function(e) {
+            screenLogger('Error encountered: ' + e.error.name );
+        });
+
+        recorder.addEventListener( "dataAvailable", function(e) {
+            screenLogger('Sended <b>' + e.detail.buffer.byteLength + '</b> bytes');
+            if (!e.detail.final) {
+                audioStream.write(e.detail.buffer);
+            } else {
+                audioStream.write(e.detail.buffer);
+                audioStream.end();
+
+                var url = 'http://' + options.host + ':' + options.port + '/streams/' + fileName;
+
+                var audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = url;
+
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                link.innerHTML = link.download;
+
+                var li = document.createElement('li');
+                li.appendChild(link);
+                li.appendChild(audio);
+
+                recordingslist.appendChild(li);
+            }            
+        });
+    });
+
+    function screenLogger(text, data) {
+      log.innerHTML += "\n" + text + " " + (data || '');
+    }
+    </script>
+</body>
+</html>
